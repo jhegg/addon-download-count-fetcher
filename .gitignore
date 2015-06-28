@@ -79,3 +79,7 @@ $RECYCLE.BIN/
 *.ipr
 *.iml
 *.iws
+
+# ===================================
+# app specific
+output.csv

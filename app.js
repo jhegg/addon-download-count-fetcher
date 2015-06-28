@@ -5,11 +5,13 @@ var request = require('request');
 var cheerio = require('cheerio');
 var moment = require('moment');
 var fs = require('fs');
+var csv = require('csv');
 
 program
   .version('0.0.1')
   .usage('-f <addons.json>')
-  .option('-f, --file <file>', 'Path to JSON file with addon details');
+  .option('-f, --file <file>', 'Path to JSON file with addon details (required)')
+  .option('-o, --outputFile <file>', 'Path to CSV output file (optional)');
 
 program.on('--help', function () {
   var addonJsonExample = '[\n' +
@@ -37,6 +39,7 @@ if (!program.file) {
 }
 
 var jsonFile = program.file;
+var outputFile = program.outputFile;
 var jsonFromFile;
 var results = {};
 
@@ -72,7 +75,24 @@ function reportTotalIfReady(addonName, count) {
   }
 
   results[addonName].count += count;
-  console.log(moment().format() + ' ' + addonName + ' count: ' + count);
+  console.log(moment().format(), addonName, results[addonName].count);
+  if (outputFile) {
+    outputCsvToFile(addonName);
+  }
+}
+
+function outputCsvToFile(addonName) {
+  var input = [[moment().format(), addonName, results[addonName].count]];
+  csv.stringify(input, function(err, output) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    fs.appendFile(outputFile, output, function (err) {
+      if (err) throw err;
+      console.log('Wrote CSV: ' + output)
+    })
+  });
 }
 
 function getDownloadCountFromScrapedCurseForgeHtml(addonName, html) {
