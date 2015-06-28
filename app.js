@@ -6,12 +6,15 @@ var cheerio = require('cheerio');
 var moment = require('moment');
 var fs = require('fs');
 var csv = require('csv');
+var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
 
 program
   .version('0.0.1')
   .usage('-f <addons.json>')
   .option('-f, --file <file>', 'Path to JSON file with addon details (required)')
-  .option('-o, --outputFile <file>', 'Path to CSV output file (optional)');
+  .option('-o, --outputFile <file>', 'Path to CSV output file (optional)')
+  .option('-m, --mongoCollection <collection>', 'MongoDB collection to insert into (optional)');
 
 program.on('--help', function () {
   var addonJsonExample = '[\n' +
@@ -40,8 +43,10 @@ if (!program.file) {
 
 var jsonFile = program.file;
 var outputFile = program.outputFile;
+var mongoCollection = program.mongoCollection;
 var jsonFromFile;
 var results = {};
+var mongoUrl = 'mongodb://localhost:27017/joshtest';
 
 fs.readFile(jsonFile, parseJsonFile);
 
@@ -76,8 +81,18 @@ function reportTotalIfReady(addonName, count) {
 
   results[addonName].count += count;
   console.log(moment().format(), addonName, results[addonName].count);
+
   if (outputFile) {
     outputCsvToFile(addonName);
+  }
+
+  if (mongoCollection) {
+    MongoClient.connect(mongoUrl, function(err, db) {
+      assert.equal(null, err);
+      insertMongoDocument(db, addonName, results[addonName].count, function() {
+        db.close();
+      });
+    });
   }
 }
 
@@ -92,6 +107,18 @@ function outputCsvToFile(addonName) {
       if (err) throw err;
       console.log('Wrote CSV: ' + output)
     })
+  });
+}
+
+function insertMongoDocument(db, addonName, count, callback) {
+  db.collection(mongoCollection).insertOne({
+    "timestamp": moment().format(),
+    "addonName": addonName,
+    "count": count
+  }, function(err, result) {
+    assert.equal(err, null);
+    console.log('Inserted a document for ' + addonName + ' into collection ' + mongoCollection);
+    callback(result);
   });
 }
 
