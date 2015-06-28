@@ -87,12 +87,7 @@ function reportTotalIfReady(addonName, count) {
   }
 
   if (mongoCollection) {
-    MongoClient.connect(mongoUrl, function(err, db) {
-      assert.equal(null, err);
-      insertMongoDocument(db, addonName, results[addonName].count, function() {
-        db.close();
-      });
-    });
+    outputToMongoCollection(addonName);
   }
 }
 
@@ -107,6 +102,15 @@ function outputCsvToFile(addonName) {
       if (err) throw err;
       console.log('Wrote CSV: ' + output)
     })
+  });
+}
+
+function outputToMongoCollection(addonName) {
+  MongoClient.connect(mongoUrl, function (err, db) {
+    assert.equal(null, err);
+    insertMongoDocument(db, addonName, results[addonName].count, function () {
+      db.close();
+    });
   });
 }
 
