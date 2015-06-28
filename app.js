@@ -14,6 +14,7 @@ program
   .usage('-f <addons.json>')
   .option('-f, --file <file>', 'Path to JSON file with addon details (required)')
   .option('-o, --outputFile <file>', 'Path to CSV output file (optional)')
+  .option('-d, --mongoDbName <name>', 'Name of Mongo database (optional)')
   .option('-m, --mongoCollection <collection>', 'MongoDB collection to insert into (optional)');
 
 program.on('--help', function () {
@@ -41,12 +42,15 @@ if (!program.file) {
   process.exit(1)
 }
 
+if (program.dbName === undefined )
+
 var jsonFile = program.file;
 var outputFile = program.outputFile;
+var mongoDbName = program.mongoDbName;
 var mongoCollection = program.mongoCollection;
 var jsonFromFile;
 var results = {};
-var mongoUrl = 'mongodb://localhost:27017/joshtest';
+var mongoUrl = 'mongodb://localhost:27017/' + mongoDbName;
 
 fs.readFile(jsonFile, parseJsonFile);
 
@@ -86,7 +90,7 @@ function reportTotalIfReady(addonName, count) {
     outputCsvToFile(addonName);
   }
 
-  if (mongoCollection) {
+  if (mongoDbName && mongoCollection) {
     outputToMongoCollection(addonName);
   }
 }
@@ -121,7 +125,7 @@ function insertMongoDocument(db, addonName, count, callback) {
     "count": count
   }, function(err, result) {
     assert.equal(err, null);
-    console.log('Inserted a document for ' + addonName + ' into collection ' + mongoCollection);
+    console.log('Inserted a document for ' + addonName + ' into collection ' + mongoCollection + ' of DB named ' + mongoDbName);
     callback(result);
   });
 }
