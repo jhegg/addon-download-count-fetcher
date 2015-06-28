@@ -1,0 +1,13 @@
+{
+  "name": "addon-download-count-fetcher",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "cheerio": "^0.19.0",
+    "commander": "^2.8.1",
+    "request": "^2.58.0"
+  },
+  "bin": {
+    "addon-download-count-fetcher": "./app.js"
+  }
+}

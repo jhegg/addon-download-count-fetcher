@@ -73,3 +73,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# ===================================
+# IntelliJ
+*.ipr
+*.iml
+*.iws
