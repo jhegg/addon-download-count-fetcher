@@ -3,6 +3,7 @@
 var program = require('commander');
 var request = require('request');
 var cheerio = require('cheerio');
+var moment = require('moment');
 var fs = require('fs');
 
 program
@@ -71,7 +72,7 @@ function reportTotalIfReady(addonName, count) {
   }
 
   results[addonName].count += count;
-  console.log(addonName + ' count: ' + count);
+  console.log(moment().format() + ' ' + addonName + ' count: ' + count);
 }
 
 function getDownloadCountFromScrapedCurseForgeHtml(addonName, html) {
